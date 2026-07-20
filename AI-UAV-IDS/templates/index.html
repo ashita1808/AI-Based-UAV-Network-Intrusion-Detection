@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI UAV IDS Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon"><i class="bi bi-shield-shaded"></i></div>
+        <div>
+          <h4>UAV IDS</h4>
+          <p>Threat Command Center</p>
+        </div>
+      </div>
+
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="bi bi-layout-sidebar-inset"></i>
+      </button>
+
+      <nav class="nav-links">
+        <a class="nav-item active" href="#"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a>
+        <a class="nav-item" href="#uploadSection"><i class="bi bi-cloud-arrow-up"></i><span>Upload Dataset</span></a>
+        <a class="nav-item" href="#predictionSection"><i class="bi bi-cpu"></i><span>Live Detection</span></a>
+        <a class="nav-item" href="#chartsSection"><i class="bi bi-bar-chart-line"></i><span>Analytics</span></a>
+        <a class="nav-item" href="#resultsSection"><i class="bi bi-journal-text"></i><span>Attack Reports</span></a>
+        <a class="nav-item" href="#performanceSection"><i class="bi bi-graph-up-arrow"></i><span>Model Performance</span></a>
+        <a class="nav-item" href="#downloadSection"><i class="bi bi-download"></i><span>Settings</span></a>
+      </nav>
+    </div>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h1>Operational Security Monitor</h1>
+          <p>Focused visibility for aerial network traffic and threat posture</p>
+        </div>
+        <div class="topbar-actions">
+          <div class="date-pill" id="dateTime"></div>
+          <div class="notification-pill"><i class="bi bi-bell-fill"></i><span>3</span></div>
+          <div class="profile-pill">
+            <div class="avatar">AI</div>
+            <div>
+              <strong>Analyst</strong>
+              <p>Threat Operations</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats-grid">
+        <div class="stat-card glass-card">
+          <div class="stat-icon blue"><i class="bi bi-box-seam"></i></div>
+          <div>
+            <h3 id="totalPackets">1.24M</h3>
+            <p>Total Packets</p>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+          <div>
+            <h3 id="normalTraffic">97.4%</h3>
+            <p>Normal Traffic</p>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-icon red"><i class="bi bi-bug"></i></div>
+          <div>
+            <h3 id="totalAttacks">3,482</h3>
+            <p>Total Attacks</p>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-icon purple"><i class="bi bi-speedometer"></i></div>
+          <div>
+            <h3 id="modelAccuracy">99.1%</h3>
+            <p>Model Accuracy</p>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
+          <div>
+            <h3 id="predictionTime">18 ms</h3>
+            <p>Prediction Time</p>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-icon cyan"><i class="bi bi-radar"></i></div>
+          <div>
+            <h3>High</h3>
+            <p>Threat Level</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <div class="card glass-card" id="uploadSection">
+          <div class="card-header">
+            <h5><i class="bi bi-cloud-arrow-up"></i> Upload Dataset</h5>
+          </div>
+          <div class="card-body">
+            <div id="dropZone" class="drop-zone">
+              <i class="bi bi-file-earmark-csv"></i>
+              <p>Drag & drop CSV here</p>
+              <span>or</span>
+              <label class="btn btn-primary mt-2" for="csvFile">Browse Dataset</label>
+              <input type="file" id="csvFile" accept=".csv" hidden />
+            </div>
+            <div class="progress mt-3" style="height: 8px;">
+              <div id="uploadProgress" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="upload-meta mt-2" id="uploadMeta">No file selected.</div>
+            <div class="preview-file mt-3" id="filePreview">Preview selected file will appear here.</div>
+          </div>
+        </div>
+
+        <div class="card glass-card" id="predictionSection">
+          <div class="card-header">
+            <h5><i class="bi bi-cpu"></i> Prediction Engine</h5>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">Run inference on the uploaded traffic dataset and inspect live anomalies.</p>
+            <button class="btn btn-success btn-lg" id="predictBtn">
+              <span class="me-2"><i class="bi bi-lightning-charge-fill"></i></span>Predict Attacks
+            </button>
+            <div class="loading mt-3" id="loadingBox">
+              <div class="spinner"></div>
+              <span>Running prediction pipeline...</span>
+            </div>
+            <div class="prediction-summary mt-3" id="predictionSummary"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card glass-card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5><i class="bi bi-table"></i> Dataset Preview</h5>
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Search table" />
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Flow ID</th>
+                  <th>Source IP</th>
+                  <th>Destination IP</th>
+                  <th>Protocol</th>
+                  <th>Packet Size</th>
+                  <th>Label</th>
+                </tr>
+              </thead>
+              <tbody id="previewTableBody"></tbody>
+            </table>
+          </div>
+          <nav class="mt-3">
+            <ul class="pagination justify-content-end" id="pagination"></ul>
+          </nav>
+        </div>
+      </section>
+
+      <section class="charts-grid mt-4" id="chartsSection">
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-pie-chart-fill"></i> Attack Distribution</h5></div>
+          <div class="card-body"><canvas id="pieChart"></canvas></div>
+        </div>
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-bar-chart-fill"></i> Attack Count</h5></div>
+          <div class="card-body"><canvas id="barChart"></canvas></div>
+        </div>
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-sliders"></i> Feature Importance</h5></div>
+          <div class="card-body"><canvas id="featureChart"></canvas></div>
+        </div>
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-graph-up"></i> Traffic Trend</h5></div>
+          <div class="card-body"><canvas id="lineChart"></canvas></div>
+        </div>
+      </section>
+
+      <section class="performance-grid mt-4" id="performanceSection">
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-award"></i> Model Performance</h5></div>
+          <div class="card-body">
+            <div class="metrics-grid">
+              <div class="metric-pill"><span>Accuracy</span><strong>99.1%</strong></div>
+              <div class="metric-pill"><span>Precision</span><strong>98.7%</strong></div>
+              <div class="metric-pill"><span>Recall</span><strong>99.3%</strong></div>
+              <div class="metric-pill"><span>F1 Score</span><strong>99.0%</strong></div>
+              <div class="metric-pill"><span>CV Score</span><strong>98.8%</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="card glass-card">
+          <div class="card-header"><h5><i class="bi bi-grid-3x3-gap"></i> Confusion Matrix</h5></div>
+          <div class="card-body">
+            <div class="matrix">
+              <div class="cell positive">TP<br/>1842</div>
+              <div class="cell negative">FP<br/>9</div>
+              <div class="cell negative">FN<br/>12</div>
+              <div class="cell positive">TN<br/>1619</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card glass-card mt-4" id="resultsSection">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5><i class="bi bi-table"></i> Prediction Results</h5>
+          <div class="badge-pill">Live inference output</div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover">
+              <thead>
+                <tr>
+                  <th>Flow ID</th>
+                  <th>Predicted Attack</th>
+                  <th>Confidence</th>
+                  <th>Threat Level</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="card glass-card mt-4" id="downloadSection">
+        <div class="card-header"><h5><i class="bi bi-download"></i> Download Center</h5></div>
+        <div class="card-body d-flex flex-wrap gap-3">
+          <button class="btn btn-primary" id="downloadCsvBtn">Download Prediction CSV</button>
+          <button class="btn btn-outline-info" id="downloadPdfBtn">Download PDF Report</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>AI UAV IDS</span>
+      <span>Developed by the team</span>
+      <span>© 2026 All Rights Reserved</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>
